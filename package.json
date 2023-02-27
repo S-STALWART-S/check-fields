@@ -1,17 +1,31 @@
 {
-	"name": "check-fields",
-	"version": "1.0.0",
-	"description": "Checks data for required fields and data types",
-	"main": "lib/index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [
-		"checker",
-		"data-checker",
-		"check-fields",
-		"fields-check"
-	],
-	"author": "S-STALWART-S",
-	"license": "MIT"
+  "name": "check-fields",
+  "author": "S-STALWART-S",
+  "description": "Checks data for required fields and data types",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "private": false,
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/S-STALWART-S/check-fields"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check:format": "prettier --write ./",
+    "check:lint": "eslint ./",
+    "check:lint:default": "eslint 'src/**/*.js'",
+    "check:security": "snyk test & snyk code test",
+    "check:style": "npm run check:format && npm run check:lint",
+    "test": "jest"
+  },
+  "keywords": [
+    "checker",
+    "data-checker",
+    "check-fields",
+    "fields-check"
+  ],
+  "files": [
+    "lib/**/*"
+  ]
 }
