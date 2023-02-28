@@ -298,10 +298,60 @@ class CheckFields {
   }
 }
 
+type FieldValueType = object | object[];
+type FieldType = "string" | "boolean" | "number" | "array" | "object";
+
+interface Field {
+  type: FieldType;
+  value?: FieldValueType;
+  required: boolean;
+}
+
+class IoFieldMaker {
+  private field: Field;
+
+  constructor() {
+    this.field = {
+      required: true,
+      type: "object",
+    };
+  }
+
+  type(type: FieldType) {
+    this.field.type = type;
+    return this;
+  }
+
+  value(value: FieldValueType) {
+    this.field.value = value;
+    return this;
+  }
+
+  required(required = true) {
+    this.field.required = required;
+    return this;
+  }
+
+  optional() {
+    this.field.required = false;
+    return this;
+  }
+
+  build(): Field {
+    if (customTypeof.isUndefined(this.field.value)) {
+      const { value, ...rest } = this.field;
+      return rest;
+    }
+    return this.field;
+  }
+}
+
+const ioFieldMaker = () => new IoFieldMaker();
+
 const checkFields = (
   ioData: IoFields,
   requiredFields: IoFields,
   errors: IoErrors
 ) => new CheckFields(ioData, requiredFields, errors).prepare();
 
-export { CheckFields, checkFields };
+export { checkFields, CheckFields, ioFieldMaker, IoFieldMaker };
