@@ -1,0 +1,18 @@
+{
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "words": [],
+  "ignoreWords": [
+    "Mostafa",
+    "Parens",
+    "Vatanpoor",
+    "flowtype",
+    "linebreak",
+    "rushstack",
+    "snyk",
+    "sonarjs"
+  ],
+  "import": []
+}

@@ -1,17 +1,58 @@
 {
-	"name": "check-fields",
-	"version": "1.0.0",
-	"description": "Checks data for required fields and data types",
-	"main": "lib/index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [
-		"checker",
-		"data-checker",
-		"check-fields",
-		"fields-check"
-	],
-	"author": "S-STALWART-S",
-	"license": "MIT"
+  "name": "check-fields",
+  "author": "S-STALWART-S",
+  "description": "Checks data for required fields and data types",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "private": false,
+  "version": "1.1.0",
+  "repository": {
+    "url": "https://github.com/S-STALWART-S/check-fields"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check:format": "prettier --write ./",
+    "check:lint": "eslint ./",
+    "check:lint:default": "eslint 'src/**/*.js'",
+    "check:security": "snyk test & snyk code test",
+    "check:style": "npm run check:format && npm run check:lint",
+    "test": "jest"
+  },
+  "keywords": [
+    "checker",
+    "data-checker",
+    "check-fields",
+    "fields-check"
+  ],
+  "files": [
+    "lib/**/*"
+  ],
+  "dependencies": {
+    "custom-typeof": "^3.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/eslint-parser": "^7.19.1",
+    "@cspell/eslint-plugin": "^6.26.3",
+    "@jest/globals": "^29.4.3",
+    "@rushstack/eslint-patch": "^1.2.0",
+    "@types/confusing-browser-globals": "^1.0.0",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.14.1",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "confusing-browser-globals": "^1.0.11",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-sonarjs": "^0.18.0",
+    "eslint-plugin-testing-library": "^5.10.2",
+    "jest": "^29.4.3",
+    "prettier": "^2.8.4",
+    "ts-jest": "^29.0.5",
+    "typescript": "^4.9.5"
+  }
 }
