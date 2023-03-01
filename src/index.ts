@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CustomTypeof, customTypeof } from "custom-typeof";
+import { customTypeof, CustomTypeof } from "custom-typeof";
 
 const errorThrower = <T>(condition: boolean, error: T) => {
   if (condition) {
@@ -10,11 +10,8 @@ const errorThrower = <T>(condition: boolean, error: T) => {
   }
 };
 
-function upperFirst(string: string) {
-  const chr = string.charAt(0);
-
-  return chr.toUpperCase() + string.slice(1);
-}
+const upperFirst = (string: string) =>
+  string.charAt(0).toUpperCase() + string.slice(1);
 
 const acceptableTypes = ["string", "boolean", "number", "array", "object"];
 
@@ -24,37 +21,37 @@ type IoError = {
 };
 
 interface IoErrors {
-  ioDataFieldInvalidType: IoError;
-  ioDataNotDefined: IoError;
-  fieldsMissing: IoError;
-  fieldsOverload: IoError;
-  requiredFieldInvalidType: IoError;
-  requiredFieldsInvalid: IoError;
-  requiredFieldsNotDefined: IoError;
+  dataFieldInvalidType: IoError;
+  dataFieldsMissing: IoError;
+  dataFieldsOverload: IoError;
+  dataNotDefined: IoError;
+  schemaInvalid: IoError;
+  schemaInvalidType: IoError;
+  schemaNotDefined: IoError;
   [prop: string]: IoError;
 }
 
 const defaultErrors: IoErrors = {
-  fieldsMissing: {
-    reason: "FIELDS_MISSING",
+  dataFieldInvalidType: {
+    reason: "DATA_FIELD_INVALID_TYPE",
   },
-  fieldsOverload: {
-    reason: "FIELDS_OVERLOAD",
+  dataFieldsMissing: {
+    reason: "DATA_FIELDS_MISSING",
   },
-  ioDataFieldInvalidType: {
-    reason: "IO_DATA_FIELD_INVALID_TYPE",
+  dataFieldsOverload: {
+    reason: "DATA_FIELDS_OVERLOAD",
   },
-  ioDataNotDefined: {
-    reason: "IO_DATA_NOT_DEFINED",
+  dataNotDefined: {
+    reason: "DATA_NOT_DEFINED",
   },
-  requiredFieldInvalidType: {
-    reason: "REQUIRED_FIELD_INVALID_TYPE",
+  schemaInvalid: {
+    reason: "SCHEMA_INVALID",
   },
-  requiredFieldsInvalid: {
-    reason: "IO_DATA_FIELDS_INVALID",
+  schemaInvalidType: {
+    reason: "SCHEMA_INVALID_TYPE",
   },
-  requiredFieldsNotDefined: {
-    reason: "REQUIRED_FIELDS_NOT_DEFINED",
+  schemaNotDefined: {
+    reason: "SCHEMA_NOT_DEFINED",
   },
 };
 
@@ -77,11 +74,11 @@ class CheckFields {
   prepare() {
     this.throwErrorIfRequiredFieldsIsNotDefined(
       this.requiredFields,
-      this.errors.requiredFieldsNotDefined
+      this.errors.schemaNotDefined
     );
 
     this.throwErrorIfIoDataIsNotDefined(
-      this.errors.ioDataNotDefined,
+      this.errors.dataNotDefined,
       this.ioData,
       this.requiredFields
     );
@@ -116,12 +113,12 @@ class CheckFields {
 
   checkIoFieldsDefinition() {
     errorThrower(!this.ioData, {
-      ...this.errors.fieldsMissing,
+      ...this.errors.dataFieldsMissing,
       ioData: this.ioData,
       requiredFields: this.requiredFields,
     });
     errorThrower(!this.requiredFields, {
-      ...this.errors.fieldsMissing,
+      ...this.errors.dataFieldsMissing,
       ioData: this.ioData,
       requiredFields: this.requiredFields,
     });
@@ -141,48 +138,36 @@ class CheckFields {
 
       const missingError = {
         ...errorBase,
-        ...this.errors.fieldsMissing,
+        ...this.errors.dataFieldsMissing,
       };
       errorThrower(ioFieldsLength < requiredFieldsLength, missingError);
 
       throw {
         ...errorBase,
-        ...this.errors.fieldsOverload,
+        ...this.errors.dataFieldsOverload,
       };
     }
   }
 
   checkRequiredFields() {
-    for (const requiredFieldKey in this.requiredFields) {
-      const ioFieldValue = (this.ioData as any)[requiredFieldKey];
-      this.throwErrorIfIoFieldIsUndefined(requiredFieldKey, ioFieldValue);
+    Object.entries(this.requiredFields).forEach(([key, requiredField]) => {
+      this.checkRequiredFieldType(key, requiredField.type);
+      const isValueDefined = requiredField.value;
+      this.checkSchema(requiredField.type, requiredField.value);
 
-      const { type: requiredFieldType, value: requiredFieldValue } = (
-        this.requiredFields as any
-      )[requiredFieldKey];
+      const ioValue = (this.ioData as any)[key];
+      this.throwErrorIfIoFieldIsUndefined(key, ioValue);
+      this.checkIoDataFieldType(key, ioValue, requiredField.type);
 
-      this.checkRequiredFieldType(requiredFieldKey, requiredFieldType);
-
-      this.checkIoDataFieldType(
-        requiredFieldKey,
-        ioFieldValue,
-        requiredFieldType
-      );
-
-      if (requiredFieldValue) {
-        this.checkRequiredFieldTypeWhenHasValue(
-          requiredFieldType,
-          requiredFieldValue
-        );
-
-        this.checkNestedFields(requiredFieldValue, ioFieldValue);
+      if (isValueDefined) {
+        this.checkNestedFields(requiredField.value, ioValue);
       }
-    }
+    });
   }
 
   throwErrorIfIoFieldIsUndefined(ioFieldKey: string, ioFieldValue: any) {
     errorThrower(customTypeof.isUndefined(ioFieldValue), {
-      ...this.errors.fieldsMissing,
+      ...this.errors.dataFieldsMissing,
       ioFieldIsUndefined: true,
       ioFieldKey,
       ioData: this.ioData,
@@ -198,7 +183,7 @@ class CheckFields {
       return;
 
     throw {
-      ...this.errors.requiredFieldInvalidType,
+      ...this.errors.schemaInvalidType,
       requiredField: {
         key: requiredFieldKey,
         type: requiredFieldType,
@@ -219,7 +204,7 @@ class CheckFields {
     if (customTypeof[typeofMethodName](ioFieldValue)) return;
 
     throw {
-      ...this.errors.ioDataFieldInvalidType,
+      ...this.errors.dataFieldInvalidType,
       ioField: {
         expectedType: requiredFieldType,
         receivedType: typeof ioFieldValue,
@@ -231,30 +216,31 @@ class CheckFields {
     };
   }
 
-  checkRequiredFieldTypeWhenHasValue(
-    requiredFieldType: string,
-    requiredFieldValue: any
-  ) {
-    const receivedType = customTypeof.isObject(requiredFieldValue)
+  checkSchema(schemaFieldType: string, schemaFieldValue: any) {
+    const { type } = customTypeof.check(schemaFieldValue);
+    const receivedType = type.isObject
       ? "object"
-      : "array";
+      : //prettier-ignore
+      type.isArray
+        ? "array"
+        : typeof schemaFieldValue;
 
     const errorBase = {
-      ...this.errors.requiredFieldsInvalid,
-      requiredFields: requiredFieldValue,
+      ...this.errors.schemaInvalid,
+      requiredFields: schemaFieldValue,
       receivedType,
     };
 
-    if (requiredFieldType !== "object" && requiredFieldType !== "array") {
+    if (["object", "array"].includes(schemaFieldType) && !schemaFieldValue) {
       throw {
         ...errorBase,
-        expectedType: receivedType,
+        expectedValue: "object | array",
+        receivedValue: schemaFieldValue,
       };
     }
-
     if (
-      requiredFieldType === "object" &&
-      customTypeof.isNotObject(requiredFieldValue)
+      schemaFieldType === "object" &&
+      customTypeof.isNotObject(schemaFieldValue)
     ) {
       throw {
         ...errorBase,
@@ -262,21 +248,30 @@ class CheckFields {
       };
     }
     if (
-      requiredFieldType === "array" &&
-      customTypeof.isNotArray(requiredFieldValue)
+      schemaFieldType === "array" &&
+      customTypeof.isNotArray(schemaFieldValue)
     ) {
       throw {
         ...errorBase,
         expectedType: "array",
       };
     }
+    if (
+      schemaFieldType !== "object" &&
+      schemaFieldType !== "array" &&
+      schemaFieldValue
+    ) {
+      throw {
+        ...errorBase,
+        expectedType: "object | array",
+      };
+    }
   }
-
   checkNestedFields(requiredFieldValue: any, ioFieldValue: any) {
     if (customTypeof.isObject(requiredFieldValue))
       this.checkObjectFields(ioFieldValue, requiredFieldValue);
     else if (customTypeof.isArray(requiredFieldValue))
-      this.checkArrayFields(ioFieldValue, requiredFieldValue[0]);
+      this.checkArrayFields(ioFieldValue, requiredFieldValue[0] || {});
   }
 
   checkObjectFields(ioData: object, requiredFields: object) {
