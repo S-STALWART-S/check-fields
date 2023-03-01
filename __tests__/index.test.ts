@@ -33,7 +33,7 @@ const defaultErrors = {
 
 const checker = (data, schema, expectedError) => {
   try {
-    new CheckFields(data, schema).prepare();
+    new CheckFields(data, schema).prepare().check();
     throw "test failed";
   } catch (error) {
     // console.log("error:::", error);

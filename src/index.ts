@@ -83,7 +83,7 @@ class CheckFields {
       this.requiredFields
     );
 
-    this.check();
+    return this;
   }
 
   throwErrorIfRequiredFieldsIsNotDefined(
@@ -347,6 +347,6 @@ const checkFields = (
   ioData: IoFields,
   requiredFields: IoFields,
   errors: IoErrors
-) => new CheckFields(ioData, requiredFields, errors).prepare();
+) => new CheckFields(ioData, requiredFields, errors).prepare().check();
 
 export { checkFields, CheckFields, ioFieldMaker, IoFieldMaker };
