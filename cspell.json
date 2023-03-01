@@ -10,6 +10,7 @@
     "Vatanpoor",
     "flowtype",
     "linebreak",
+    "nocheck",
     "rushstack",
     "snyk",
     "sonarjs"
