@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "license": "MIT",
   "private": false,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "repository": {
     "url": "https://github.com/S-STALWART-S/check-fields"
   },
