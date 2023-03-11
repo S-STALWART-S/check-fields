@@ -8,13 +8,13 @@ type IoError = {
 };
 
 // eslint-disable-next-line no-use-before-define
-type FieldValueType = IoField | IoField[];
+type FieldValueType = IoFields | [IoFields];
 type FieldType = "string" | "boolean" | "number" | "array" | "object";
 
 interface IoField {
   type: FieldType;
   // eslint-disable-next-line no-use-before-define
-  value?: IoFields;
+  value?: FieldValueType;
   required: boolean;
 }
 
@@ -321,7 +321,7 @@ class IoFieldMaker {
     return this;
   }
 
-  value(value: IoFields) {
+  value(value: FieldValueType) {
     this.field.value = value;
     return this;
   }
