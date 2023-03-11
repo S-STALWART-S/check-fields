@@ -13,7 +13,8 @@ type FieldType = "string" | "boolean" | "number" | "array" | "object";
 
 interface IoField {
   type: FieldType;
-  value?: FieldValueType;
+  // eslint-disable-next-line no-use-before-define
+  value?: IoFields;
   required: boolean;
 }
 
@@ -320,7 +321,7 @@ class IoFieldMaker {
     return this;
   }
 
-  value(value: FieldValueType) {
+  value(value: IoFields) {
     this.field.value = value;
     return this;
   }
