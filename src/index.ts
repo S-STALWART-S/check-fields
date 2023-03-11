@@ -2,6 +2,36 @@
 
 import { customTypeof, CustomTypeof } from "custom-typeof";
 
+type IoError = {
+  reason: string;
+  [prop: string]: any;
+};
+
+// eslint-disable-next-line no-use-before-define
+type FieldValueType = IoField | IoField[];
+type FieldType = "string" | "boolean" | "number" | "array" | "object";
+
+interface IoField {
+  type: FieldType;
+  value?: FieldValueType;
+  required: boolean;
+}
+
+interface IoFields {
+  [prop: string]: IoField;
+}
+
+interface IoErrors {
+  dataFieldInvalidType: IoError;
+  dataFieldsMissing: IoError;
+  dataFieldsOverload: IoError;
+  dataNotDefined: IoError;
+  schemaInvalid: IoError;
+  schemaInvalidType: IoError;
+  schemaNotDefined: IoError;
+  [prop: string]: IoError;
+}
+
 const errorThrower = <T>(condition: boolean, error: T) => {
   if (condition) {
     if (typeof error === "function") throw error();
@@ -14,22 +44,6 @@ const upperFirst = (string: string) =>
   string.charAt(0).toUpperCase() + string.slice(1);
 
 const acceptableTypes = ["string", "boolean", "number", "array", "object"];
-
-type IoError = {
-  reason: string;
-  [prop: string]: any;
-};
-
-interface IoErrors {
-  dataFieldInvalidType: IoError;
-  dataFieldsMissing: IoError;
-  dataFieldsOverload: IoError;
-  dataNotDefined: IoError;
-  schemaInvalid: IoError;
-  schemaInvalidType: IoError;
-  schemaNotDefined: IoError;
-  [prop: string]: IoError;
-}
 
 const defaultErrors: IoErrors = {
   dataFieldInvalidType: {
@@ -55,13 +69,11 @@ const defaultErrors: IoErrors = {
   },
 };
 
-type IoFields = object;
-
 class CheckFields {
   errors: IoErrors;
 
   constructor(
-    public ioData: IoFields,
+    public ioData: any,
     public requiredFields: IoFields,
     errors: IoErrors = defaultErrors
   ) {
@@ -274,11 +286,11 @@ class CheckFields {
       this.checkArrayFields(ioFieldValue, requiredFieldValue[0] || {});
   }
 
-  checkObjectFields(ioData: object, requiredFields: object) {
+  checkObjectFields(ioData: any, requiredFields: IoFields) {
     checkFields(ioData, requiredFields, this.errors);
   }
 
-  checkArrayFields(ioData: any[], requiredFields: object) {
+  checkArrayFields(ioData: any[], requiredFields: IoFields) {
     ioData.forEach((item: any) => {
       checkFields(item, requiredFields, this.errors);
     });
@@ -293,17 +305,8 @@ class CheckFields {
   }
 }
 
-type FieldValueType = object | object[];
-type FieldType = "string" | "boolean" | "number" | "array" | "object";
-
-interface Field {
-  type: FieldType;
-  value?: FieldValueType;
-  required: boolean;
-}
-
 class IoFieldMaker {
-  private field: Field;
+  private field: IoField;
 
   constructor() {
     this.field = {
@@ -332,7 +335,7 @@ class IoFieldMaker {
     return this;
   }
 
-  build(): Field {
+  build(): IoField {
     if (customTypeof.isUndefined(this.field.value)) {
       const { value, ...rest } = this.field;
       return rest;
@@ -349,4 +352,15 @@ const checkFields = (
   errors: IoErrors
 ) => new CheckFields(ioData, requiredFields, errors).prepare().check();
 
-export { checkFields, CheckFields, ioFieldMaker, IoFieldMaker };
+export {
+  checkFields,
+  CheckFields,
+  FieldType,
+  FieldValueType,
+  IoError,
+  IoErrors,
+  IoField,
+  ioFieldMaker,
+  IoFieldMaker,
+  IoFields,
+};
